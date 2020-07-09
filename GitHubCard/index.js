@@ -1,45 +1,37 @@
 import axios from 'axios';
 
 const cards = document.querySelector('.cards');
-addToCards('emcleary');
-const instructors = [
-    'tetondan',
-    'dustinmyers',
-    'justsml',
-    'luishrd',
-    'bigknell',
-]
-instructors.forEach( elem => addToCards(elem) );
+addToCards('emcleary', true);
+// const instructors = [
+//     'tetondan',
+//     'dustinmyers',
+//     'justsml',
+//     'luishrd',
+//     'bigknell',
+// ]
+// instructors.forEach( elem => addToCards(elem) );
 
 
-function addToCards(username) {
+function addToCards(username, includeFollowers) {
     const gitHubURL = `https://api.github.com/users/${username}`;
-    // Get data (if possible)
     axios.get(gitHubURL)
-	.then(function (data) {
-	    // Get new card using data
-	    const card = makeInstructorCard(data);
+	.then(function (userObj) {
+	    const card = makeInstructorCard(userObj);
 	    card.className = 'card';
-	    // Append new card to cards
 	    cards.appendChild(card);
-	    // // Return followers
-	    // debugger
-	    // return data
+	    return userObj.data.followers_url;
 	})
-	// .then(function (data) {
-	//     // Get followers url
-	//     const followersURL = data.followers_url;
-	//     axios.get(followersURL)
-	// 	.then(function(followersArray) {
-	// 	    debugger
-	// 	    followersArray.forEach( follower => {
-	// 		addToCards(follower.login);
-	// 	    });
-	// 	})
-	// 	.catch(function(error) {
-	// 	    console.log(error);
-	// 	})
-	// })
+	.then(function (followersURL) {
+	    if (!includeFollowers) return;
+	    console.log(followersURL);
+	    axios.get(followersURL)
+	    	.then(function(followersObj) {
+	    	    followersObj.data.forEach( follower => addToCards(follower.login) );
+	    	})
+	    	.catch(function(error) {
+	    	    console.log(error);
+	    	})
+	})
 	.catch(function(error) {
 	    console.log(error);
 	})
@@ -50,17 +42,6 @@ function addToCards(username) {
     (replacing the placeholder with your Github name):
     https://api.github.com/users/<your name>
 */
-// const myGitHubURL = 'https://api.github.com/users/emcleary';
-const myGitHubURL = 'https://api.github.com/users/tetondan';
-axios.get(myGitHubURL)
-    .then(function (data) {
-	console.log('no error!')
-    })
-    .catch(function (error) {
-	console.log(error)
-    })
-	  
-
 
 /*
   STEP 2: Inspect and study the data coming back, this is YOUR
